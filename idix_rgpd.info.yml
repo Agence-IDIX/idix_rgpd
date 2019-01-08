@@ -1,0 +1,5 @@
+name: idix_rgpd
+type: module
+description: Manage RGPD settings
+core: 8.x
+package: IDIX

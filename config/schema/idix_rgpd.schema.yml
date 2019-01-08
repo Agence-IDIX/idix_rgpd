@@ -1,0 +1,61 @@
+idix_rgpd.settings:
+  type: config_object
+  label: "IDIX RGPD Settings"
+  mapping:
+    configuration:
+      type: mapping
+      label: "IDIX RGPD options configuration"
+      mapping:
+        hashtag:
+          type: string
+          label: "Hash présent dans l'url d'une page permettant d'ouvrir automatiquement le panel de consentement."
+        cookieName:
+          type: string
+          label: "Nom du cookie qui stocke le consentement de l'utilisateur."
+        highPrivacy:
+          type: boolean
+          label: "Activer le consentement explicite = suppression du consentement implicite lors du scroll ou de la navigation dans le site."
+        orientation:
+          type: string
+          label: "Positionne le bandeau en bas ou haut de l'interface du site."
+        adblocker:
+          type: boolean
+          label: "Afficher un message si un adblocker est détecté."
+        showAlertSmall:
+          type: boolean
+          label: "Afficher le petit bouton en bas à droite permettant d'ouvrir le panel de consentement."
+        cookieslist:
+          type: boolean
+          label: "Afficher la liste des cookies installés (accès via AlertSmall)."
+        removeCredit:
+          type: boolean
+          label: "Désactiver le lien de crédit Tarteaucitron."
+        handleBrowserDNTRequest:
+          type: boolean
+          label: "Refuser automatiquement le consentement si le DNT est activé (https://fr.wikipedia.org/wiki/Do_Not_Track)."
+        cookieDomain:
+          type: string
+          label: "Nom de domaine sur lequel sera posé le cookie pour les sous-domaines."
+        AcceptAllCta:
+          type: boolean
+          label: "Affiche le bouton pour consentir à tous les services si le consentement explicite est activé (cf highPrivacy)."
+        moreInfoLink:
+          type: boolean
+          label: "Affiche le lien `En savoir plus` de chaque service."
+        privacyUrl:
+          type: string
+          label: "URL de la page `Politique de confidentialité`."
+        useExternalCss:
+          type: boolean
+          label: "Désactive le chargement de la feuille de style tarteaucitron.css."
+    services:
+      type: mapping
+      label: "Available list of services"
+      mapping:
+        analytics:
+          type: mapping
+          label: "Google Analytics (universal) configuration"
+          mapping:
+            enabled:
+              type: boolean
+              label: "Active le service Google Analytics (universal)"

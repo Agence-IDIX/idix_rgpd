@@ -1,0 +1,21 @@
+{
+  "name": "idix/idix_rgpd",
+  "type": "drupal-custom-module",
+  "description": "Manage RGPD parameters",
+  "keywords": ["Drupal", "cookies", "RGPD"],
+  "authors": [
+    {
+      "name": "Sylvain Tixier",
+      "email": "sylvain.tixier@idix.fr",
+      "role": "Maintainer"
+    },
+    {
+      "name": "Thierry Langlois",
+      "email": "thierry.langlois@idix.fr",
+      "role": "Maintainer"
+    }
+  ],
+  "require": {
+    "drupal/core": "8.*"
+  }
+}

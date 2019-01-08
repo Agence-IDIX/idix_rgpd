@@ -1,0 +1,18 @@
+configuration:
+  hashtag: '#rgpdconsent'
+  cookieName: rgpdconsent
+  highPrivacy: false
+  orientation: bottom
+  adblocker: false
+  showAlertSmall: false
+  cookieslist: false
+  removeCredit: true
+  handleBrowserDNTRequest: false
+  cookieDomain: ''
+  AcceptAllCta: true
+  moreInfoLink: false
+  privacyUrl: /confidentialite
+  useExternalCss: true
+services:
+  youtube:
+    enabled: false

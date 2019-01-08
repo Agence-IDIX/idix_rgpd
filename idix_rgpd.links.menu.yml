@@ -1,0 +1,6 @@
+system.rgpd:
+  route_name: idix_rgpd.settings
+  title: RGPD settings
+  description: 'Manage RPGD settings.'
+  parent: system.admin_config_system
+  weight: 20

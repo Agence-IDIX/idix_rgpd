@@ -1,0 +1,1 @@
+<span class="youtube_player" videoID="<?php print $video_id; ?>" width="<?php print $width; ?>" height="<?php print $height; ?>" theme="dark" rel="0" controls="1" showinfo="0" autoplay="<?php print $autoplay; ?>" style="display: inline-block;"></span>

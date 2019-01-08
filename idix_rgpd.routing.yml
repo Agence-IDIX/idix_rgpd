@@ -1,0 +1,7 @@
+idix_rgpd.settings:
+  path: '/admin/config/system/rgpd'
+  defaults:
+    _form: '\Drupal\idix_rgpd\Form\SettingsForm'
+    _title: 'RGPD Settings'
+  requirements:
+    _permission: 'administer rgpd settings'
