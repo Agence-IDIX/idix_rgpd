@@ -1,0 +1,27 @@
+(function () {
+  {% if config.analyticsUa %}
+  tarteaucitron.user.analyticsUa = '{{ config.analyticsUa }}';
+
+  {% if config.analyticsUaCreate %}
+  tarteaucitron.user.analyticsUaCreate = {{ config.analyticsUaCreate|raw }};
+  {% endif %}
+
+  {% if config.analyticsAnonymizeIp %}
+  tarteaucitron.user.analyticsAnonymizeIp = true;
+  {% endif %}
+
+  {% if config.analyticsMore %}
+  tarteaucitron.user.analyticsMore = {{ config.analyticsMore|raw }};
+  {% endif %}
+
+  {% if config.analyticsPageView %}
+  tarteaucitron.user.analyticsPageView = {{ config.analyticsPageView|raw }};
+  {% endif %}
+
+  {% if config.analyticsPrepare %}
+  tarteaucitron.user.analyticsPrepare = {{ config.analyticsPrepare|raw }};
+  {% endif %}
+
+  (tarteaucitron.job = tarteaucitron.job || []).push('analytics');
+  {% endif %}
+})();

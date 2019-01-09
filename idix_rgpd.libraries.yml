@@ -1,0 +1,10 @@
+init:
+  js:
+    js/init.js: {}
+  dependencies:
+    - core/drupal
+    - idix_rgpd/tarteaucitron
+
+tarteaucitron:
+  js:
+    /libraries/tarteaucitron/tarteaucitron.js: { preprocess: false }

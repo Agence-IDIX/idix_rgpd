@@ -29,6 +29,15 @@ class SettingsForm extends ConfigFormBase  {
     $config = $this->config('idix_rgpd.settings');
     $definition = \Drupal::service('config.typed')->getDefinition('idix_rgpd.settings');
     $optionsDefinition = $definition['mapping']['configuration']['mapping'];
+    $servicesDefinition = $definition['mapping']['services']['mapping'];
+    // ksm($servicesDefinition);
+
+    // Activation globale
+    $form['enabled'] = [
+      '#title' => 'Activer le consentement',
+      '#type' => 'checkbox',
+      '#default_value' => $config->get('enabled')
+    ];
 
     // Configuration options
     $form['configuration'] = array(
@@ -38,11 +47,33 @@ class SettingsForm extends ConfigFormBase  {
     );
     $optionFields = $this->getOptionFields();
     foreach ($optionFields as $option => $field) {
-      $form['configuration'][$option] = array(
+      $element_key = 'configuration_' . $option;
+      $form['configuration'][$element_key] = array(
         '#default_value' => $config->get('configuration.' . $option),
         '#description' => $optionsDefinition[$option]['label']
       );
-      $form['configuration'][$option] += $field;
+      $form['configuration'][$element_key] += $field;
+    }
+
+    $form['services'] = array(
+      '#type' => 'vertical_tabs',
+      '#title' => 'Liste des services'
+    );
+    $serviceFields = $this->getServiceFields();
+    foreach ($serviceFields as $service => $fields) {
+      $form[$service] = [
+        '#type' => 'details',
+        '#title' => $servicesDefinition[$service]['label'],
+        '#group' => 'services'
+      ];
+      foreach ($fields as $key => $field) {
+        $element_key = 'service_' . $service . '_' . $key;
+        $form[$service][$element_key] = array(
+          '#default_value' => $config->get('services.' . $service . '.' . $key),
+          '#title' => $servicesDefinition[$service]['mapping'][$key]['label']
+        );
+        $form[$service][$element_key] += $field;
+      }
     }
 
     return parent::buildForm($form, $form_state);
@@ -53,11 +84,24 @@ class SettingsForm extends ConfigFormBase  {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $config = $this->configFactory->getEditable('idix_rgpd.settings');
+    $config->set('enabled', $form_state->getValue('enabled'));
+
     $optionFields = $this->getOptionFields();
     foreach ($optionFields as $option => $field) {
-      $config->set('configuration.' . $option, $form_state->getValue($option));
+      $config->set('configuration.' . $option, $form_state->getValue('configuration_' . $option));
+    }
+
+    $serviceFields = $this->getServiceFields();
+    foreach ($serviceFields as $service => $fields) {
+      foreach ($fields as $key => $field) {
+        $config->set('services.' . $service . '.' . $key, $form_state->getValue('service_' . $service . '_' . $key));
+      }
     }
     $config->save();
+
+    // Génération du fichier javascript : services autoloader
+    _idix_rgpd_generate_services();
+
     parent::submitForm($form, $form_state);
   }
 
@@ -126,8 +170,39 @@ class SettingsForm extends ConfigFormBase  {
         '#type' => 'checkbox'
       ],
       'useExternalCss' => [
-        '#title' => 'CSS Tarteaucitron',
+        '#title' => 'CSS Custom',
         '#type' => 'checkbox'
+      ]
+    ];
+  }
+
+  private function getServiceFields () {
+    return [
+      'analytics' => [
+        'enabled' => [
+          '#type' => 'checkbox'
+        ],
+        'analyticsUa' => [
+          '#type' => 'textfield',
+          '#size' => 12
+        ],
+        'analyticsUaCreate' => [
+          '#type' => 'textarea',
+          '#description' => "Objet javascript correspondant au 3e paramètre pour la méthode `create` (<a href=\"https://developers.google.com/analytics/devguides/collection/analyticsjs/field-reference\" target=\"_blank\">documentation Google</a>).<br>
+          <code>ga('create', 'UA-XXXX-Y', {'cookieExpires': 34128000});</code>"
+        ],
+        'analyticsPrepare' => [
+          '#type' => 'textarea'
+        ],
+        'analyticsPageView' => [
+          '#type' => 'textarea'
+        ],
+        'analyticsMore' => [
+          '#type' => 'textarea'
+        ],
+        'analyticsAnonymizeIp' => [
+          '#type' => 'checkbox'
+        ]
       ]
     ];
   }

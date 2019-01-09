@@ -1,8 +1,9 @@
+enabled: false
 configuration:
   hashtag: '#rgpdconsent'
   cookieName: rgpdconsent
   highPrivacy: false
-  orientation: bottom
+  orientation: 'bottom'
   adblocker: false
   showAlertSmall: false
   cookieslist: false
@@ -11,8 +12,14 @@ configuration:
   cookieDomain: ''
   AcceptAllCta: true
   moreInfoLink: false
-  privacyUrl: /confidentialite
-  useExternalCss: true
+  privacyUrl: ''
+  useExternalCss: false
 services:
-  youtube:
+  analytics:
     enabled: false
+    analyticsUa: ''
+    analyticsUaCreate: ''
+    analyticsPrepare: ''
+    analyticsPageView: ''
+    analyticsMore: ''
+    analyticsAnonymizeIp: false
