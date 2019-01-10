@@ -27,8 +27,16 @@ function idix_rgpd_help($route_name, RouteMatchInterface $route_match) {
  * Implements hook_install().
  */
 function idix_rgpd_install() {
-  $destination = 'public://idix_rgpd';
+  $destination = file_default_scheme() . '://idix_rgpd';
   file_prepare_directory($destination, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function idix_rgpd_uninstall() {
+  $destination = file_default_scheme() . '://idix_rgpd';
+  file_unmanaged_delete_recursive($destination);
 }
 
 /**
