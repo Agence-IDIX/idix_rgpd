@@ -91,3 +91,6 @@ idix_rgpd.service.gtag:
     gtagMore:
       type: string
       label: "Fonction déclenchée après le `gtag('config')` initial"
+    gtagPrepare:
+      type: string
+      label: "Fonction déclenchée avant le `gtag('config')` initial"

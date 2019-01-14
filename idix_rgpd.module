@@ -172,6 +172,9 @@ function _idix_rgpd_service_fields_gtag () {
       '#type' => 'textfield',
       '#size' => 12
     ],
+    'gtagPrepare' => [
+      '#type' => 'textarea'
+    ],
     'gtagMore' => [
       '#type' => 'textarea'
     ]

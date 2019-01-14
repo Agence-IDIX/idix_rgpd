@@ -2,8 +2,12 @@
   {% if config.gtagUa %}
   tarteaucitron.user.gtagUa = '{{ config.gtagUa }}';
 
+  {% if config.gtagPrepare %}
+  tarteaucitron.user.gtagPrepare = function () { {{ config.gtagPrepare|raw }} };
+  {% endif %}
+
   {% if config.gtagMore %}
-  tarteaucitron.user.gtagMore = {{ config.gtagMore|raw }};
+  tarteaucitron.user.gtagMore = function () { {{ config.gtagMore|raw }} };
   {% endif %}
 
   (tarteaucitron.job = tarteaucitron.job || []).push('gtag');
