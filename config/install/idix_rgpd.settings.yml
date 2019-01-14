@@ -14,12 +14,3 @@ configuration:
   moreInfoLink: false
   privacyUrl: ''
   useExternalCss: false
-services:
-  analytics:
-    enabled: false
-    analyticsUa: ''
-    analyticsUaCreate: ''
-    analyticsPrepare: ''
-    analyticsPageView: ''
-    analyticsMore: ''
-    analyticsAnonymizeIp: false

@@ -51,32 +51,29 @@ idix_rgpd.settings:
         useExternalCss:
           type: boolean
           label: "Utiliser une feuille de style custom à la place de tarteaucitron.css"
-    services:
-      type: mapping
-      label: "Available list of services"
-      mapping:
-        analytics:
-          type: mapping
-          label: "Google Analytics (universal)"
-          mapping:
-            enabled:
-              type: boolean
-              label: "Activer le service"
-            analyticsUa:
-              type: string
-              label: "ID de suivi"
-            analyticsUaCreate:
-              type: string
-              label: "Paramètres de la methode `create`"
-            analyticsPrepare:
-              type: string
-              label: "Fonction déclenchée avant le `send pageview` initiale"
-            analyticsPageView:
-              type: string
-              label: "Paramètres de la methode `send pageview`"
-            analyticsMore:
-              type: string
-              label: "Fonction déclenchée après le `send pageview` initiale"
-            analyticsAnonymizeIp:
-              type: boolean
-              label: "Anonymiser l'adresse IP"
+
+idix_rgpd.service.analytics:
+  type: config_object
+  label: "Google Analytics (universal)"
+  mapping:
+    enabled:
+      type: boolean
+      label: "Activer le service"
+    analyticsUa:
+      type: string
+      label: "ID de suivi"
+    analyticsUaCreate:
+      type: string
+      label: "Paramètres de la methode `create`"
+    analyticsPrepare:
+      type: string
+      label: "Fonction déclenchée avant le `send pageview` initiale"
+    analyticsPageView:
+      type: string
+      label: "Paramètres de la methode `send pageview`"
+    analyticsMore:
+      type: string
+      label: "Fonction déclenchée après le `send pageview` initiale"
+    analyticsAnonymizeIp:
+      type: boolean
+      label: "Anonymiser l'adresse IP"

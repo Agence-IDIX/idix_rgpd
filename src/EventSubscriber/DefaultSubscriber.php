@@ -34,7 +34,7 @@ class DefaultSubscriber implements EventSubscriberInterface {
    * @param GetResponseEvent $event
    */
   public function config_save(Event $event) {
-    _idix_rgpd_generate_services();
+    _idix_rgpd_generate_services_loader();
   }
 
 }

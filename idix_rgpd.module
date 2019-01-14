@@ -43,10 +43,9 @@ function idix_rgpd_uninstall() {
  * Implements hook_theme().
  */
 function idix_rgpd_theme($existing, $type, $theme, $path) {
-  $definition = \Drupal::service('config.typed')->getDefinition('idix_rgpd.settings');
-  $servicesDefinition = array_keys($definition['mapping']['services']['mapping']);
+  $servicesDefs = _idix_rgpd_get_services_defs();
   $themes = [];
-  foreach ($servicesDefinition as $service) {
+  foreach ($servicesDefs as $service => $def) {
     $themes['idix_rgpd_service_' . $service] = [
       'variables' => [
         'config' => NULL
@@ -60,7 +59,7 @@ function idix_rgpd_theme($existing, $type, $theme, $path) {
  * Implements hook_library_info_build().
  */
 function idix_rgpd_library_info_build() {
-  $stream_wrapper = \Drupal::service('stream_wrapper_manager')->getViaUri('public://');
+  $stream_wrapper = \Drupal::service('stream_wrapper_manager')->getViaUri(file_default_scheme() . '://');
   $path = base_path() . $stream_wrapper->getDirectoryPath() . '/idix_rgpd';
 
   $libraries = [];
@@ -75,26 +74,40 @@ function idix_rgpd_library_info_build() {
 }
 
 /**
+ * Implements hook_page_attachments().
+ */
+function idix_rgpd_page_attachments(array &$attachments) {
+  $config = \Drupal::config('idix_rgpd.settings');
+  $activeTheme = \Drupal::service('theme.manager')->getActiveTheme()->getName();
+  $defaultTheme = \Drupal::config('system.theme')->get('default');
+  if ($config->get('enabled') && $activeTheme == $defaultTheme) {
+    $attachments['#attached']['drupalSettings']['idix_rgpd'] = [];
+    $attachments['#attached']['drupalSettings']['idix_rgpd']['options'] = $config->get('configuration');
+    $attachments['#attached']['library'][] = 'idix_rgpd/services_loader';
+  }
+}
+
+/**
  * Implements hook_preprocess_html().
  */
 function idix_rgpd_preprocess_html(&$variables) {
   $config = \Drupal::config('idix_rgpd.settings');
-  if ($config->get('enabled') && \Drupal::service('theme.manager')->getActiveTheme()->getName() == \Drupal::config('system.theme')->get('default')) {
+  $activeTheme = \Drupal::service('theme.manager')->getActiveTheme()->getName();
+  $defaultTheme = \Drupal::config('system.theme')->get('default');
+  if ($config->get('enabled') && $activeTheme == $defaultTheme) {
     $variables['html_attributes']->addClass('rgpd-consent');
-    $variables['#attached']['drupalSettings']['idix_rgpd'] = [];
-    $variables['#attached']['drupalSettings']['idix_rgpd']['options'] = \Drupal::config('idix_rgpd.settings')->get('configuration');
-    $variables['#attached']['library'][] = 'idix_rgpd/services_loader';
   }
 }
 
-function _idix_rgpd_generate_services() {
+function _idix_rgpd_generate_services_loader() {
   $renderArray = [];
-  $services = \Drupal::config('idix_rgpd.settings')->get('services');
-  foreach ($services as $service => $serviceConfig) {
-    if ($serviceConfig['enabled']) {
+  $servicesDefs = _idix_rgpd_get_services_defs();
+  foreach ($servicesDefs as $service => $serviceConfig) {
+    $config = \Drupal::config('idix_rgpd.service.' . $service);
+    if ($config->get('enabled')) {
       $renderArray[] = [
         '#theme' => 'idix_rgpd_service_' . $service,
-        '#config' => $serviceConfig
+        '#config' => $config->getRawData()
       ];
     }
   }
@@ -103,42 +116,49 @@ function _idix_rgpd_generate_services() {
 
 function _idix_rgpd_generate_file ($renderArray, $filename) {
   $html = \Drupal::service('renderer')->render($renderArray);
-  $html = preg_replace("#<!--[^-]*(?:-(?!->)[^-]*)*-->#", '', preg_replace(array('/\r/', '/\n/'), '', $html));
-  $html = preg_replace('/\s+(?![^<>]*>)/x', '', $html);
+  if (Drupal::service('twig')->isDebug()) {
+    $html = preg_replace("#<!--[^-]*(?:-(?!->)[^-]*)*-->#", '', preg_replace(array('/\r/', '/\n/'), '', $html));
+    $html = preg_replace('/\s+(?![^<>]*>)/x', '', $html);
+  }
   file_unmanaged_save_data($html, 'public://idix_rgpd/' . $filename, FILE_EXISTS_REPLACE);
 }
 
-// function _idix_rgpd_get_services ($service = NULL, $type = NULL) {
-//   $services = [
-//     "gajs" => [
-//       "type" => "analytic",
-//       "name" => "Google Analytics (ga.js)",
-//     ],
-//     "analytics" => [
-//       "type" => "analytic",
-//       "name" => "Google Analytics (universal)",
-//     ],
-//     "youtube" => [
-//       "type" => "video",
-//       "name" => "YouTube",
-//       "regexp" => [
-//         "/youtube\.com\/embed\/([a-z0-9\-_]+)/i"
-//       ]
-//     ]
-//   ];
+function _idix_rgpd_get_services_defs () {
+  $services_defs = [];
+  $defs = \Drupal::service('config.typed')->getDefinitions();
+  foreach ($defs as $defName => $def) {
+    if (preg_match('/idix_rgpd\.service\.(.*)/', $defName, $matches)) {
+      $services_defs[$matches[1]] = $def;
+    }
+  }
+  return $services_defs;
+}
 
-//   // filtering options
-//   if ($service != NULL) {
-//     return isset($services[$service]) ? $services[$service] : NULL;
-//   }
-//   elseif ($type != NULL) {
-//     if (gettype($type) == 'string') {
-//       $type = [$type];
-//     }
-//     return array_filter($services, function ($service) use ($type) {
-//       return in_array($service['type'], $type);
-//     });
-//   }
-
-//   return $services;
-// }
+function _idix_rgpd_service_fields_analytics () {
+  return [
+    'enabled' => [
+      '#type' => 'checkbox'
+    ],
+    'analyticsUa' => [
+      '#type' => 'textfield',
+      '#size' => 12
+    ],
+    'analyticsUaCreate' => [
+      '#type' => 'textarea',
+      '#description' => "Objet javascript correspondant au 3e paramètre pour la méthode `create` (<a href=\"https://developers.google.com/analytics/devguides/collection/analyticsjs/field-reference\" target=\"_blank\">documentation Google</a>).<br>
+      <code>ga('create', 'UA-XXXX-Y', {'cookieExpires': 34128000});</code>"
+    ],
+    'analyticsPrepare' => [
+      '#type' => 'textarea'
+    ],
+    'analyticsPageView' => [
+      '#type' => 'textarea'
+    ],
+    'analyticsMore' => [
+      '#type' => 'textarea'
+    ],
+    'analyticsAnonymizeIp' => [
+      '#type' => 'checkbox'
+    ]
+  ];
+}

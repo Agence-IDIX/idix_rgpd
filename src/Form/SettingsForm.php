@@ -19,27 +19,29 @@ class SettingsForm extends ConfigFormBase  {
   }
 
   protected function getEditableConfigNames() {
-    return ['idix_rgpd.settings'];
+    $configs = ['idix_rgpd.settings'];
+    $servicesDefs = _idix_rgpd_get_services_defs();
+    foreach ($servicesDefs as $key => $value) {
+      $configs[] = 'idix_rgpd.service.' . $key;
+    }
+    return $configs;
   }
 
   /**
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    $config = $this->config('idix_rgpd.settings');
+    // Settings
+    $settingsConfig = $this->config('idix_rgpd.settings');
     $definition = \Drupal::service('config.typed')->getDefinition('idix_rgpd.settings');
     $optionsDefinition = $definition['mapping']['configuration']['mapping'];
-    $servicesDefinition = $definition['mapping']['services']['mapping'];
-    // ksm($servicesDefinition);
 
-    // Activation globale
     $form['enabled'] = [
       '#title' => 'Activer le consentement',
       '#type' => 'checkbox',
-      '#default_value' => $config->get('enabled')
+      '#default_value' => $settingsConfig->get('enabled')
     ];
 
-    // Configuration options
     $form['configuration'] = array(
       '#type' => 'details',
       '#title' => 'Options',
@@ -49,30 +51,38 @@ class SettingsForm extends ConfigFormBase  {
     foreach ($optionFields as $option => $field) {
       $element_key = 'configuration_' . $option;
       $form['configuration'][$element_key] = array(
-        '#default_value' => $config->get('configuration.' . $option),
+        '#default_value' => $settingsConfig->get('configuration.' . $option),
         '#description' => $optionsDefinition[$option]['label']
       );
       $form['configuration'][$element_key] += $field;
     }
 
+    // Services
     $form['services'] = array(
       '#type' => 'vertical_tabs',
       '#title' => 'Liste des services'
     );
-    $serviceFields = $this->getServiceFields();
-    foreach ($serviceFields as $service => $fields) {
-      $form[$service] = [
-        '#type' => 'details',
-        '#title' => $servicesDefinition[$service]['label'],
-        '#group' => 'services'
-      ];
-      foreach ($fields as $key => $field) {
-        $element_key = 'service_' . $service . '_' . $key;
-        $form[$service][$element_key] = array(
-          '#default_value' => $config->get('services.' . $service . '.' . $key),
-          '#title' => $servicesDefinition[$service]['mapping'][$key]['label']
-        );
-        $form[$service][$element_key] += $field;
+
+    $servicesDefs = _idix_rgpd_get_services_defs();
+    foreach ($servicesDefs as $service => $def) {
+      $config = $this->config('idix_rgpd.service.' . $service);
+      $fieldsCallback = '_idix_rgpd_service_fields_' . $service;
+      if (function_exists($fieldsCallback)) {
+        $fields = $fieldsCallback();
+        $form[$service] = [
+          '#type' => 'details',
+          '#title' => $def['label'],
+          '#group' => 'services'
+        ];
+
+        foreach ($fields as $key => $field) {
+          $form_key = 'service_' . $service . '_' . $key;
+          $form[$service][$form_key] = array(
+            '#default_value' => $config->get($key),
+            '#title' => $def['mapping'][$key]['label']
+          );
+          $form[$service][$form_key] += $field;
+        }
       }
     }
 
@@ -83,24 +93,31 @@ class SettingsForm extends ConfigFormBase  {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
+    // Settings
     $config = $this->configFactory->getEditable('idix_rgpd.settings');
     $config->set('enabled', $form_state->getValue('enabled'));
-
     $optionFields = $this->getOptionFields();
     foreach ($optionFields as $option => $field) {
       $config->set('configuration.' . $option, $form_state->getValue('configuration_' . $option));
     }
-
-    $serviceFields = $this->getServiceFields();
-    foreach ($serviceFields as $service => $fields) {
-      foreach ($fields as $key => $field) {
-        $config->set('services.' . $service . '.' . $key, $form_state->getValue('service_' . $service . '_' . $key));
-      }
-    }
     $config->save();
 
+    // Services
+    $servicesDefs = _idix_rgpd_get_services_defs();
+    foreach ($servicesDefs as $service => $def) {
+      $config = $this->config('idix_rgpd.service.' . $service);
+      $fieldsCallback = '_idix_rgpd_service_fields_' . $service;
+      if (function_exists($fieldsCallback)) {
+        $fields = $fieldsCallback();
+        foreach ($fields as $key => $field) {
+          $config->set($key, $form_state->getValue('service_' . $service . '_' . $key));
+        }
+      }
+      $config->save();
+    }
+
     // Génération du fichier javascript : services autoloader
-    _idix_rgpd_generate_services();
+    _idix_rgpd_generate_services_loader();
 
     parent::submitForm($form, $form_state);
   }
@@ -172,37 +189,6 @@ class SettingsForm extends ConfigFormBase  {
       'useExternalCss' => [
         '#title' => 'CSS Custom',
         '#type' => 'checkbox'
-      ]
-    ];
-  }
-
-  private function getServiceFields () {
-    return [
-      'analytics' => [
-        'enabled' => [
-          '#type' => 'checkbox'
-        ],
-        'analyticsUa' => [
-          '#type' => 'textfield',
-          '#size' => 12
-        ],
-        'analyticsUaCreate' => [
-          '#type' => 'textarea',
-          '#description' => "Objet javascript correspondant au 3e paramètre pour la méthode `create` (<a href=\"https://developers.google.com/analytics/devguides/collection/analyticsjs/field-reference\" target=\"_blank\">documentation Google</a>).<br>
-          <code>ga('create', 'UA-XXXX-Y', {'cookieExpires': 34128000});</code>"
-        ],
-        'analyticsPrepare' => [
-          '#type' => 'textarea'
-        ],
-        'analyticsPageView' => [
-          '#type' => 'textarea'
-        ],
-        'analyticsMore' => [
-          '#type' => 'textarea'
-        ],
-        'analyticsAnonymizeIp' => [
-          '#type' => 'checkbox'
-        ]
       ]
     ];
   }
