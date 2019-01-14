@@ -162,3 +162,18 @@ function _idix_rgpd_service_fields_analytics () {
     ]
   ];
 }
+
+function _idix_rgpd_service_fields_gtag () {
+  return [
+    'enabled' => [
+      '#type' => 'checkbox'
+    ],
+    'gtagUa' => [
+      '#type' => 'textfield',
+      '#size' => 12
+    ],
+    'gtagMore' => [
+      '#type' => 'textarea'
+    ]
+  ];
+}

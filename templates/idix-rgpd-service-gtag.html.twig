@@ -1,0 +1,11 @@
+(function () {
+  {% if config.gtagUa %}
+  tarteaucitron.user.gtagUa = '{{ config.gtagUa }}';
+
+  {% if config.gtagMore %}
+  tarteaucitron.user.gtagMore = {{ config.gtagMore|raw }};
+  {% endif %}
+
+  (tarteaucitron.job = tarteaucitron.job || []).push('gtag');
+  {% endif %}
+})();
