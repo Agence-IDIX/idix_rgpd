@@ -115,12 +115,14 @@ function _idix_rgpd_generate_services_loader() {
 }
 
 function _idix_rgpd_generate_file ($renderArray, $filename) {
-  $html = \Drupal::service('renderer')->render($renderArray);
-  if (Drupal::service('twig')->isDebug()) {
-    $html = preg_replace("#<!--[^-]*(?:-(?!->)[^-]*)*-->#", '', preg_replace(array('/\r/', '/\n/'), '', $html));
-    $html = preg_replace('/\s+(?![^<>]*>)/x', '', $html);
+  if(\Drupal::service('renderer')->hasRenderContext()) {
+    $html = \Drupal::service('renderer')->render($renderArray);
+    if (Drupal::service('twig')->isDebug()) {
+      $html = preg_replace("#<!--[^-]*(?:-(?!->)[^-]*)*-->#", '', preg_replace(array('/\r/', '/\n/'), '', $html));
+      $html = preg_replace('/\s+(?![^<>]*>)/x', '', $html);
+    }
+    file_unmanaged_save_data($html, 'public://idix_rgpd/' . $filename, FILE_EXISTS_REPLACE);
   }
-  file_unmanaged_save_data($html, 'public://idix_rgpd/' . $filename, FILE_EXISTS_REPLACE);
 }
 
 function _idix_rgpd_get_services_defs () {
